@@ -3,3 +3,467 @@ npm install @tanstack/react-query react-router-dom tailwindcss postcss autoprefi
 npx shadcn-ui@latest init
 npx shadcn-ui@latest add button card input
 npm run dev
+music-app/
+├── package.json
+├── tailwind.config.js
+├── src/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
+│   ├── Layout.jsx
+│   ├── pages/
+│   │   ├── Dashboard.jsx
+│   │   ├── Create.jsx
+│   │   ├── Library.jsx
+│   │   ├── Artists.jsx
+│   │   ├── Samples.jsx
+│   │   └── Code.jsx
+│   ├── components/
+│   │   ├── create/
+│   │   ├── library/
+│   │   ├── artists/
+│   │   └── samples/
+│   ├── entities/
+│   │   ├── AudioSample.json
+│   │   ├── Artist.json
+│   │   ├── Album.json
+│   │   └── Song.json
+└── vite.config.js
+{
+  "name": "music-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.0.0",
+    "lucide-react": "^0.4.0",
+    "framer-motion": "^11.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "vite": "^5.0.0"
+  }
+}
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </React.StrictMode>,
+);
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './Layout';
+import Dashboard from './pages/Dashboard';
+import Create from './pages/Create';
+import Library from './pages/Library';
+import Artists from './pages/Artists';
+import Samples from './pages/Samples';
+import Code from './pages/Code';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/create" element={<Create />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/artists" element={<Artists />} />
+          <Route path="/samples" element={<Samples />} />
+          <Route path="/code" element={<Code />} />
+          <Route path="/" element={<Dashboard />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+import { Outlet } from 'react-router-dom';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+
+function Layout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Music App</h1>
+        <Button
+          variant="ghost"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          aria-label="Toggle sidebar"
+        >
+          <Menu />
+        </Button>
+      </header>
+      <div className="flex">
+        <nav className={`w-64 bg-white shadow p-4 ${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+          <ul>
+            <li><a href="/dashboard" className="block p-2 hover:bg-gray-200">Dashboard</a></li>
+            <li><a href="/create" className="block p-2 hover:bg-gray-200">Create</a></li>
+            <li><a href="/library" className="block p-2 hover:bg-gray-200">Library</a></li>
+            <li><a href="/artists" className="block p-2 hover:bg-gray-200">Artists</a></li>
+            <li><a href="/samples" className="block p-2 hover:bg-gray-200">Samples</a></li>
+            <li><a href="/code" className="block p-2 hover:bg-gray-200">Code</a></li>
+          </ul>
+        </nav>
+        <main className="flex-1 p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default Layout;
+function Dashboard() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold">Dashboard</h2>
+      <p>Welcome to the Music App! Manage your songs, artists, and samples.</p>
+    </div>
+  );
+}
+
+export default Dashboard;
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+// Replace with actual Base44 SDK import
+const base44 = { post: async (url, data) => ({ data: { lyrics: 'Generated lyrics' } }) };
+
+function Create() {
+  const [title, setTitle] = useState('');
+  const mutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await base44.post('/generate-lyrics', { title: data.title });
+      return response.data.lyrics;
+    },
+  });
+
+  const handleGenerateLyrics = () => {
+    mutation.mutate({ title });
+  };
+
+  return (
+    <div>
+      <h2 className="text-3xl font-bold">Create Song</h2>
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Song Title"
+        className="mb-4"
+        aria-label="Song title"
+      />
+      <Button onClick={handleGenerateLyrics} disabled={mutation.isLoading}>
+        {mutation.isLoading ? 'Generating...' : 'Generate Lyrics'}
+      </Button>
+      {mutation.data && <pre>{mutation.data}</pre>}
+    </div>
+  );
+}
+
+export default Create;
+function Library() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold">Song Library</h2>
+      <p>View and manage your songs here.</p>
+    </div>
+  );
+}
+
+export default Library;
+function Artists() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold">Artists</h2>
+      <p>Manage artists and their profiles.</p>
+    </div>
+  );
+}
+
+export default Artists;
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+// Replace with actual Base44 SDK import
+const base44 = { get: async () => ({ data: [{ name: 'Sample 1', sample_type: 'Drum Loop', duration: 10, file_url: 'https://example.com/sample1.mp3', tags: ['loop', 'electronic'] }]) });
+
+function Samples() {
+  const { data: samples, isLoading, error } = useQuery({
+    queryKey: ['samples'],
+    queryFn: async () => {
+      const response = await base44.get('/samples');
+      return response.data;
+    },
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-4"
+    >
+      <h2 className="text-3xl font-bold">Audio Sample Warehouse</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {samples?.map((sample) => (
+          <Card key={sample.name}>
+            <CardHeader>
+              <CardTitle>{sample.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Type: {sample.sample_type}</p>
+              <p>Duration: {sample.duration}s</p>
+              {sample.bpm && <p>BPM: {sample.bpm}</p>}
+              {sample.key && <p>Key: {sample.key}</p>}
+              <p>Tags: {sample.tags?.join(', ')}</p>
+              <audio controls src={sample.file_url} className="mt-2 w-full" aria-label={`Play ${sample.name}`} />
+              <Button asChild>
+                <a href={sample.file_url} download aria-label={`Download ${sample.name}`}>Download</a>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+export default Samples;
+function Code() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold">Code</h2>
+      <p>App architecture and schema details.</p>
+    </div>
+  );
+}
+
+export default Code;
+{
+  "name": "AudioSample",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Sample name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to audio sample file"
+    },
+    "duration": {
+      "type": "number",
+      "description": "Duration in seconds"
+    },
+    "sample_type": {
+      "type": "string",
+      "enum": ["Vocal", "Drum Loop", "Bass", "Guitar", "Piano", "Synth", "Percussion", "Ambient", "FX", "Full Track", "Other"],
+      "description": "Type of audio sample"
+    },
+    "bpm": {
+      "type": "number",
+      "description": "Beats per minute if applicable"
+    },
+    "key": {
+      "type": "string",
+      "description": "Musical key if applicable"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Tags for categorization"
+    },
+    "description": {
+      "type": "string",
+      "description": "Sample description"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where the sample came from"
+    }
+  },
+  "required": ["name", "file_url"]
+}
+{
+  "name": "Artist",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the artist"
+    },
+    "name": {
+      "type": "string",
+      "description": "Artist name"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Artist biography"
+    },
+    "profile_image_url": {
+      "type": "string",
+      "description": "URL to artist profile image"
+    },
+    "genre": {
+      "type": "string",
+      "enum": ["Pop", "Rock", "Hip Hop", "R&B", "Country", "Electronic", "Jazz", "Classical", "Folk", "Alternative", "Indie", "Metal", "Soul", "Funk", "Blues", "Reggae", "Latin", "Other"],
+      "description": "Primary genre"
+    },
+    "social_links": {
+      "type": "object",
+      "description": "Social media links",
+      "properties": {
+        "instagram": {"type": "string"},
+        "twitter": {"type": "string"},
+        "spotify": {"type": "string"}
+      }
+    }
+  },
+  "required": ["id", "name"]
+}
+{
+  "name": "Album",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the album"
+    },
+    "title": {
+      "type": "string",
+      "description": "Album title"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID of the artist"
+    },
+    "release_date": {
+      "type": "string",
+      "description": "Release date (e.g., '2025-10-25')"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "URL to album cover image"
+    },
+    "genre": {
+      "type": "string",
+      "enum": ["Pop", "Rock", "Hip Hop", "R&B", "Country", "Electronic", "Jazz", "Classical", "Folk", "Alternative", "Indie", "Metal", "Soul", "Funk", "Blues", "Reggae", "Latin", "Other"],
+      "description": "Album genre"
+    },
+    "description": {
+      "type": "string",
+      "description": "Album description"
+    }
+  },
+  "required": ["id", "title", "artist_id"]
+}
+{
+  "name": "Song",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Song title"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID of the artist"
+    },
+    "album_id": {
+      "type": "string",
+      "description": "ID of the album"
+    },
+    "lyrics": {
+      "type": "string",
+      "description": "Full song lyrics"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL to audio file"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "URL to song cover image"
+    },
+    "genre": {
+      "type": "string",
+      "enum": ["Pop", "Rock", "Hip Hop", "R&B", "Country", "Electronic", "Jazz", "Classical", "Folk", "Alternative", "Indie", "Metal", "Soul", "Funk", "Blues", "Reggae", "Latin", "Other"],
+      "description": "Music genre"
+    },
+    "mood": {
+      "type": "string",
+      "enum": ["Happy", "Sad", "Energetic", "Calm", "Romantic", "Angry", "Nostalgic", "Melancholic", "Uplifting", "Dark"],
+      "description": "Song mood/feeling"
+    },
+    "duration": {
+      "type": "string",
+      "description": "Song duration (e.g., '3:45')"
+    },
+    "bpm": {
+      "type": "number",
+      "description": "Beats per minute"
+    },
+    "key": {
+      "type": "string",
+      "description": "Musical key (e.g., 'C Major', 'A Minor')"
+    },
+    "description": {
+      "type": "string",
+      "description": "Song description or notes"
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false,
+      "description": "Favorite status"
+    }
+  },
+  "required": ["title"]
+}
