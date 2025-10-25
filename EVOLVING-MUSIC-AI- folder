@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolving Music AI Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4b0082, #8a2be2);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .dashboard {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .create-button {
+            background: linear-gradient(45deg, #ff69b4, #9370db);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .create-button:hover {
+            transform: scale(1.1);
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+        .stats div {
+            margin: 10px 0;
+        }
+        .lyrics {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ffd700;
+            max-width: 300px;
+            word-wrap: break-word;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .icon {
+            width: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Welcome to Your Studio</h1>
+        <p>Create amazing music with AI-powered lyrics and custom album art. Your creativity has no limits.</p>
+        <button class="create-button" onclick="createSong()">➕ Create New Song</button>
+        <div class="stats">
+            <div><img src="https://img.icons8.com/ios-filled/50/FF69B4/music.png" class="icon">Total Songs: 6 <span style="color: #32CD32">↑12% this month</span></div>
+            <div><img src="https://img.icons8.com/ios-filled/50/FF1493/like.png" class="icon">Favorites: 0</div>
+        </div>
+        <div class="lyrics" id="lyricsOutput"></div>
+    </div>
+
+    <script>
+        async function generateLyrics() {
+            // Placeholder for AI lyrics generation API call
+            // Replace with a real API endpoint (e.g., Hugging Face Inference API)
+            const response = await fetch('https://api.example.com/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: "Write a verse about music and stars", length: 50 })
+            });
+            const data = await response.json();
+            return data.lyrics || "Verse: Twinkling stars sing a melody, guiding notes through the galaxy...";
+        }
+
+        async function createSong() {
+            const synth = new Tone.Synth().toDestination();
+            synth.triggerAttackRelease("C4", "8n");
+
+            // Generate and display lyrics
+            const lyrics = await generateLyrics();
+            document.getElementById('lyricsOutput').innerText = lyrics;
+            alert("New song created! A C4 note was played, and lyrics generated.");
+        }
+    </script>
+</body>
+</html>
