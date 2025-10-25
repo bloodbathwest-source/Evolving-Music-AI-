@@ -1,0 +1,5 @@
+npm create vite@latest . -- --template react
+npm install @tanstack/react-query react-router-dom tailwindcss postcss autoprefixer lucide-react framer-motion
+npx shadcn-ui@latest init
+npx shadcn-ui@latest add button card input
+npm run dev
